@@ -60,8 +60,11 @@ class ClientPlayer(ClientEntity):
     def __init__(self, attrs: EntityNetworkAttrs) -> None:
         super().__init__(attrs)
         self.type = 'player'
+        self.img = pygame.image.load('assets/red-player.png').convert_alpha()
     
     def update(self, screen: pygame.Surface):
-        pygame.draw.rect(screen, (255, 0, 0), self.attrs.rect)
+        screen.blit(self.img, self.attrs.rect)
+
+        #pygame.draw.rect(screen, (255, 0, 0), self.attrs.rect)
 
 add_entity_type('player', (ServerPlayer, ClientPlayer))

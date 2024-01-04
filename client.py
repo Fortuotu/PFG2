@@ -18,6 +18,15 @@ class Game:
 
         self.entities = {}
 
+        self.background = pygame.image.load('assets/background.png').convert_alpha()
+        self.background = pygame.transform.scale(self.background, (1000, 1000))
+        self.background.set_alpha(255 * 0.1)
+
+        self.background_rect = self.background.get_rect()
+        self.background_rect.center = (0, 0)
+
+        self.x, self.y = self.background_rect.topleft
+
     def handle_packet(self, packet):
         packet_type = type(packet)
 
@@ -52,6 +61,17 @@ class Game:
                                        event.type == pygame.KEYDOWN,
                                        event.type == pygame.KEYUP))
             
+            self.screen.blit(self.background, self.background_rect)
+
+            self.x += 5
+            self.y += 5
+
+            self.background_rect.topleft = (self.x, self.y)
+
+            if self.background_rect.x >= 0:
+                self.background_rect.center = (0, 0)
+                self.x, self.y = self.background_rect.topleft
+
             for _, entity in self.entities.items():
                 entity.update(self.screen)
 
