@@ -101,7 +101,7 @@ class ServerSocket(GameSocket):
             return
 
         return (packet, addr)
-    
+
     # NOTE: this function needs to be callen repeatetly in the server's event loop of the game
     def send_packet_to_all_clients(self, packet):
         self.check_for_disconected_clients()

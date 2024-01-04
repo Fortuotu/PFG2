@@ -1,22 +1,35 @@
+import pygame
+
 from types import SimpleNamespace
+from uuid import uuid4
 
 EntityNetworkAttrs = SimpleNamespace
 
 class ServerEntity:
 
     def __init__(self):
-        self.network_attrs = None
+        self.id = uuid4()
+        self.type = ''
+
+        self.network_attrs = EntityNetworkAttrs()
     
     def compile_network_attrs(self):
-        pass
+        raise NotImplementedError
 
     def update(self):
-        pass
+        raise NotImplementedError
 
 class ClientEntity:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, attrs: EntityNetworkAttrs) -> None:
+        self.attrs = attrs
+        self.type = ''
+
+    def set_attrs(self, attrs: EntityNetworkAttrs):
+        self.attrs = attrs
+
+    def update(self, screen: pygame.Surface):
+        raise NotImplementedError
 
 _entity_types = {}
 
