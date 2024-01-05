@@ -19,9 +19,7 @@ class Server:
 
         # game setup
         self.players = {}
-        self.entities = {}
-
-        self.entity_updates = EntitiesUpdatePacket([])
+        self.entities = get_entities()
 
         self.clock = pygame.time.Clock()
         self.server_tick_rate = 30
@@ -30,7 +28,9 @@ class Server:
         print(f"a new client has joined with the address of {client_addr}")
 
         self.players[client_addr] = create_server_entity('player')
-        self.entities[self.players[client_addr].id] = self.players[client_addr]
+
+        
+        #self.entities[self.players[client_addr].id] = self.players[client_addr]
 
     def on_client_leave(self, client_addr):
         print(f"a client with the address of {client_addr} has left")
@@ -39,16 +39,16 @@ class Server:
         del self.players[client_addr]
     
     def update_entities(self):
-        self.entity_updates.entity_packets.clear()
-
-        for entity_id, entity in self.entities.items():
+        for _, entity in self.entities.items():
             entity.update()
-            
-            self.entity_updates.entity_packets.append(
-                EntityUpdatePacket(
-                    entity.type,
-                    entity_id,
-                    entity.compile_network_attrs()))
+    
+    def send_entity_updates(self):
+        for entity_id, entity in self.entities.items():
+            self.sock.send_packet_to_all_clients(
+                    EntityUpdatePacket(
+                        entity.type,
+                        entity_id,
+                        entity.compile_network_attrs()))
 
     def handle_packet(self, packet, addr):
         packet_type = type(packet)
@@ -66,8 +66,8 @@ class Server:
                 self.handle_packet(packet, addr)
 
             self.update_entities()
+            self.send_entity_updates()
 
-            self.sock.send_packet_to_all_clients(self.entity_updates)
             self.clock.tick(self.server_tick_rate)
 
 s = Server()

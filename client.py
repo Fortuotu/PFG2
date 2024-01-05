@@ -19,7 +19,7 @@ class Game:
         self.entities = {}
 
         self.background = pygame.image.load('assets/background.png').convert_alpha()
-        self.background = pygame.transform.scale(self.background, (1000, 1000))
+        self.background = pygame.transform.scale(self.background, (128 * 8, 128 * 8))
         self.background.set_alpha(255 * 0.1)
 
         self.background_rect = self.background.get_rect()
@@ -30,27 +30,29 @@ class Game:
     def handle_packet(self, packet):
         packet_type = type(packet)
 
-        if packet_type == EntitiesUpdatePacket:
-            for entity_packet in packet.entity_packets:
-
-                # add entity if doesn't exist on client side
-                if entity_packet.entity_id not in self.entities:
-                    self.entities[entity_packet.entity_id] = create_client_entity(
-                        entity_packet.entity_type,
-                        entity_packet.entity_attrs)
-                    
-                # update client-side entity
-                else:
-                    self.entities[entity_packet.entity_id].set_attrs(entity_packet.entity_attrs)
+        if packet_type == EntityUpdatePacket:
+            # add entity if doesn't exist on client side
+            if packet.entity_id not in self.entities:
+                self.entities[packet.entity_id] = create_client_entity(
+                    packet.entity_type,
+                    packet.entity_id,
+                    packet.entity_attrs)
+                
+            # update client-side entity
+            else:
+                self.entities[packet.entity_id].set_attrs(packet.entity_attrs)
 
     def run(self):
         self.sock.connect_to_server('localhost', 9999)
         self.sock.send_packet('CONNECT')
         
         while self.running:
-            packet = self.sock.recv_packet()
-            if packet:
-                self.handle_packet(packet)
+            while True:
+                packet = self.sock.recv_packet()
+                if packet:
+                    self.handle_packet(packet)
+                else:
+                    break
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -63,8 +65,8 @@ class Game:
             
             self.screen.blit(self.background, self.background_rect)
 
-            self.x += 5
-            self.y += 5
+            self.x += 0.2
+            self.y += 0.2
 
             self.background_rect.topleft = (self.x, self.y)
 

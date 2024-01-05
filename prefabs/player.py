@@ -26,23 +26,24 @@ class ServerPlayer(ServerEntity):
         if key_down:
             if key == pygame.K_w:
                 self.velocity.y += -1
-            elif key == pygame.K_s:
+            if key == pygame.K_s:
                 self.velocity.y += 1
-
             if key == pygame.K_a:
                 self.velocity.x += -1
-            elif key == pygame.K_d:
+            if key == pygame.K_d:
                 self.velocity.x += 1
+            
+            if key == pygame.K_e:
+                create_server_entity('wall', self.rect.topleft)
 
         elif key_up:
             if key == pygame.K_w:
                 self.velocity.y += 1
-            elif key == pygame.K_s:
+            if key == pygame.K_s:
                 self.velocity.y += -1
-
             if key == pygame.K_a:
                 self.velocity.x += 1
-            elif key == pygame.K_d:
+            if key == pygame.K_d:
                 self.velocity.x += -1
         
         if self.velocity == [0, 0]:
@@ -61,6 +62,7 @@ class ClientPlayer(ClientEntity):
         super().__init__(attrs)
         self.type = 'player'
         self.img = pygame.image.load('assets/red-player.png').convert_alpha()
+        self.img = pygame.transform.scale(self.img, (15 * 4, 15 * 4))
     
     def update(self, screen: pygame.Surface):
         screen.blit(self.img, self.attrs.rect)
