@@ -2,15 +2,13 @@ import pygame
 
 from types import SimpleNamespace
 from uuid import uuid4
+from itertools import count
 
 EntityNetworkAttrs = SimpleNamespace
 
 class ServerEntity:
 
     def __init__(self):
-        self.type = ''
-        self.id = uuid4()
-
         self.network_attrs = EntityNetworkAttrs()
     
     def compile_network_attrs(self):
@@ -23,7 +21,6 @@ class ClientEntity:
 
     def __init__(self, attrs: EntityNetworkAttrs) -> None:
         self.attrs = attrs
-        self.type = ''
 
     def set_attrs(self, attrs: EntityNetworkAttrs):
         self.attrs = attrs
@@ -33,24 +30,43 @@ class ClientEntity:
 
 _entity_types = {}
 
-def add_entity_type(entity_type: str, classes: tuple[ServerEntity, ClientEntity]):
-    _entity_types[entity_type] = classes
+_entity_counter = count()
 
-_entities = {}
+_entities_organized_by_id = {}
+_entities_organized_by_type_and_id = {}
+
+def add_entity_type(entity_type: str, classes: tuple[ServerEntity, ClientEntity]):
+    classes[0].entity_type = entity_type
+    classes[1].entity_type = entity_type
+
+    _entities_organized_by_type_and_id[entity_type] = {}
+
+    _entity_types[entity_type] = classes
 
 def create_server_entity(entity_type: str, *args) -> ServerEntity:
     entity = _entity_types[entity_type][0](*args)
-    _entities[entity.id] = entity
+
+    entity_id = next(_entity_counter)
+
+    _entities_organized_by_id[entity_id] = entity
+    _entities_organized_by_type_and_id[entity_type][entity_id] = entity
+
     return entity
 
-def create_client_entity(entity_type: str, entity_id, *args) -> ClientEntity:
+def get_entities_by_type(entity_type: str):
+    return _entities_organized_by_type_and_id[entity_type]
+
+def create_client_entity(entity_type: str, entity_id: int, *args) -> ClientEntity:
     entity = _entity_types[entity_type][1](*args)
-    _entities[entity_id] = entity
+
+    _entities_organized_by_id[entity_id] = entity
+    _entities_organized_by_type_and_id[entity_type][entity_id] = entity
+
     return entity
 
 def get_entities():
-    return _entities
+    return _entities_organized_by_id
 
 def update_entities():
-    for entity in _entities:
+    for entity in _entities_organized_by_id:
         entity.update()
