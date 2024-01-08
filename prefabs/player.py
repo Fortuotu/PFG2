@@ -28,6 +28,9 @@ class ServerPlayer(ServerEntity):
         self.network_attrs.rect = self.rect
         return self.network_attrs
 
+    def shoot_bullet(self, mouse_pos: pygame.Vector2):
+        create_server_entity('bullet', pygame.Vector2(self.rect.center), mouse_pos)
+
     def check_collsion(self):
         self.pos.x += self.normalized_vel.x * self.speed
         self.rect.topleft = self.pos

@@ -58,6 +58,9 @@ class Game:
                         KeyInputPacket(event.key,
                                        event.type == pygame.KEYDOWN,
                                        event.type == pygame.KEYUP))
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.sock.send_packet(
+                        ShootBulletPacket(pygame.Vector2(pygame.mouse.get_pos())))
                 elif event.type == pygame.VIDEORESIZE:
                     pass
             

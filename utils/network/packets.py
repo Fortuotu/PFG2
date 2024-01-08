@@ -15,3 +15,8 @@ class KeyInputPacket:
         self.key = key
         self.key_down = key_down
         self.key_up = key_up
+
+class ShootBulletPacket:
+
+    def __init__(self, mouse_pos: pygame.Vector2) -> None:
+        self.mouse_pos = mouse_pos

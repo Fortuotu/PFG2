@@ -56,6 +56,8 @@ class Server:
 
         if packet_type == KeyInputPacket:
             player.handle_key_input(packet.key, packet.key_down, packet.key_up)
+        elif packet_type == ShootBulletPacket:
+            player.shoot_bullet(packet.mouse_pos)
 
     def main_loop(self):
         while True:
