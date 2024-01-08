@@ -15,7 +15,7 @@ class ServerBullet(ServerEntity):
         self.rect.center = self.pos
         self.distance = math.sqrt((abs(start_pos.x - mouse_pos.x) ** 2) + (abs(start_pos.y - mouse_pos.y) ** 2))
         self.direction = pygame.Vector2((mouse_pos.x - start_pos.x) / self.distance, (mouse_pos.y - start_pos.y) / self.distance)
-        self.speed = 5
+        self.speed = 15
 
     def compile_network_attrs(self):
         self.network_attrs.rect = self.rect

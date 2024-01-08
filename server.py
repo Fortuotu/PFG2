@@ -35,6 +35,8 @@ class Server:
     def on_client_leave(self, client_addr):
         print(f"a client with the address of {client_addr} has left")
 
+        self.sock.queue_packet(RemoveEntityPacket('player', self.players[client_addr].id))
+
         del self.entities[self.players[client_addr].id]
         del self.players[client_addr]
     
@@ -44,7 +46,7 @@ class Server:
     
     def send_entity_updates(self):
         for entity_id, entity in self.entities.items():
-            self.sock.send_packet_to_all_clients(
+            self.sock.queue_packet(
                     EntityUpdatePacket(
                         entity.type,
                         entity_id,
@@ -69,6 +71,8 @@ class Server:
 
             self.update_entities()
             self.send_entity_updates()
+            self.sock.send_queued_packets()
+            self.sock.check_for_disconected_clients()
 
             self.clock.tick(self.server_tick_rate)
 

@@ -62,6 +62,8 @@ class ServerSocket(GameSocket):
 
         self.max_skiped_client_pings = 5
 
+        self.queued_packets = []
+
     def bind_to_address(self, address: str, port: int):
         self.sock.bind((address, port))
 
@@ -77,6 +79,9 @@ class ServerSocket(GameSocket):
         for client_addr in removed_clients:
             del self.clients[client_addr]
             self.on_client_leave(client_addr)
+
+    def queue_packet(self, packet):
+        self.queued_packets.append(packet)
 
     def recv_packet_from(self):
         ready_to_read, _, _ = select(
@@ -103,10 +108,11 @@ class ServerSocket(GameSocket):
         return (packet, addr)
 
     # NOTE: this function needs to be callen repeatetly in the server's event loop of the game
-    def send_packet_to_all_clients(self, packet):
-        self.check_for_disconected_clients()
-        for client in self.clients:
-            self.send_packet_to(packet, client)
+    def send_queued_packets(self):
+        for packet in self.queued_packets:
+            for client in self.clients:
+                self.send_packet_to(packet, client)
+        self.queued_packets.clear()
 
 class ClientSocket(GameSocket):
     

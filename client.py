@@ -33,10 +33,12 @@ class Game:
                     packet.entity_type,
                     packet.entity_id,
                     packet.entity_attrs)
-                
             # update client-side entity
             else:
                 self.entities[packet.entity_id].set_attrs(packet.entity_attrs)
+        elif packet_type == RemoveEntityPacket:
+            print("remove entity packet")
+            del self.entities[packet.entity_id]
 
     def run(self):
         self.sock.connect_to_server('localhost', 9999)

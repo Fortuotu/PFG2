@@ -47,11 +47,20 @@ def create_server_entity(entity_type: str, *args) -> ServerEntity:
     entity = _entity_types[entity_type][0](*args)
 
     entity_id = next(_entity_counter)
+    entity.id = entity_id
 
     _entities_organized_by_id[entity_id] = entity
     _entities_organized_by_type_and_id[entity_type][entity_id] = entity
 
     return entity
+
+def remove_entity(entity_id: int):
+    entity = _entities_organized_by_id[entity_id]
+    entity_type = entity.type
+
+    del _entities_organized_by_id[entity_id]
+
+    del _entities_organized_by_type_and_id[entity_type][entity_id]
 
 def get_entities_by_type(entity_type: str):
     return _entities_organized_by_type_and_id[entity_type]
