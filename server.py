@@ -5,13 +5,18 @@ from utils.network.entity import *
 from utils.network.packets import *
 import prefabs
 
+class ServerGlobalState:
+    
+    def __init__(self, socket):
+        self.sock = socket
+
 class Server:
 
     def __init__(self):
         # socket setup
         self.sock = ServerSocket()
 
-        self.sock.bind_to_address('localhost', 9999)
+        self.sock.bind_to_address('192.168.1.39', 9999)
         self.sock.set_socket_recv_buffer_size(1024)
 
         self.sock.on_new_client = self.on_new_client
@@ -19,15 +24,19 @@ class Server:
 
         # game setup
         self.players = {}
-        self.entities = get_entities()
+        self.entities = entity_manager.get_all_entities()
 
         self.clock = pygame.time.Clock()
         self.server_tick_rate = 30
+
+        self.global_state = ServerGlobalState(self.sock)
+
+        set_entity_global_vars(self.global_state)
     
     def on_new_client(self, client_addr):
         print(f"a new client has joined with the address of {client_addr}")
 
-        self.players[client_addr] = create_server_entity('player')
+        self.players[client_addr] = entity_manager.create_server_entity('player')
 
         
         #self.entities[self.players[client_addr].id] = self.players[client_addr]
@@ -69,7 +78,8 @@ class Server:
                 packet, addr = data
                 self.handle_packet(packet, addr)
 
-            self.update_entities()
+            entity_manager.update_entities()
+            entity_manager.flush_removed_entities()
             self.send_entity_updates()
             self.sock.send_queued_packets()
             self.sock.check_for_disconected_clients()

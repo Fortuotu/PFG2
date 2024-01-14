@@ -1,5 +1,5 @@
 import pygame
-
+import random
 from utils.network.entity import *
 from utils.network.entity import EntityNetworkAttrs
 
@@ -15,21 +15,22 @@ class ServerPlayer(ServerEntity):
         self.rect = pygame.Rect(0, 0, 15 * 4, 15 * 4)
 
         self.last_key = pygame.K_w
-
+        self.color = random.choice(('red', 'blue', 'green'))
         self.velocity = pygame.Vector2(0, 0)
         self.normalized_vel = self.velocity
 
         self.speed = 5
 
-        self.walls = get_entities_by_type('wall')
+        self.walls = entity_manager.get_entities_by_type('wall')
 
     def compile_network_attrs(self):
         self.network_attrs.pos = self.pos
         self.network_attrs.rect = self.rect
+        self.network_attrs.color = self.color
         return self.network_attrs
 
     def shoot_bullet(self, mouse_pos: pygame.Vector2):
-        create_server_entity('bullet', pygame.Vector2(self.rect.center), mouse_pos)
+        entity_manager.create_server_entity('bullet', pygame.Vector2(self.rect.center), mouse_pos)
 
     def check_collsion(self):
         self.pos.x += self.normalized_vel.x * self.speed
@@ -74,7 +75,7 @@ class ServerPlayer(ServerEntity):
             if wall.rect.colliderect(wall_rect):
                 return
 
-        create_server_entity('wall', creation_pos)
+        entity_manager.create_server_entity('wall', creation_pos)
 
     def handle_key_input(self, key: int, key_down: bool, key_up: bool):
         if key_down:
@@ -116,7 +117,8 @@ class ClientPlayer(ClientEntity):
     def __init__(self, attrs: EntityNetworkAttrs) -> None:
         super().__init__(attrs)
         self.type = 'player'
-        self.img = pygame.image.load('assets/red-player.png').convert_alpha()
+        self.color = f'assets/{self.attrs.color}-player.png'
+        self.img = pygame.image.load(self.color).convert_alpha()
         self.img = pygame.transform.scale(self.img, (attrs.rect.w, attrs.rect.h))
     
     def update(self, screen: pygame.Surface):
@@ -124,4 +126,4 @@ class ClientPlayer(ClientEntity):
 
         #pygame.draw.rect(screen, (255, 0, 0), (self.attrs.pos[0], self.attrs.pos[1], 15 * 4, 15 * 4))
 
-add_entity_type('player', (ServerPlayer, ClientPlayer))
+entity_manager.add_entity_type('player', (ServerPlayer, ClientPlayer))

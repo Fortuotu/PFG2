@@ -97,9 +97,7 @@ class ServerSocket(GameSocket):
 
         if addr not in self.clients:
             self.clients[addr] = ClientConnectionState()
-
-            if self.on_new_client:
-                self.on_new_client(addr)
+            self.on_new_client(addr)
         
         if type(packet) == PingPacket:
             self.clients[addr].last_ping = time.time()

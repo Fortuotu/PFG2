@@ -1,4 +1,5 @@
 import pygame
+from utils.network.packets import *
 
 from utils.network.entity import *
 
@@ -12,7 +13,7 @@ class ServerWall(ServerEntity):
         self.rect = pygame.Rect(pos[0], pos[1], wall_size[0], wall_size[1])
         self.damage_state = 0
 
-        self.bullets: dict = get_entities_by_type('bullet')
+        self.bullets: dict = entity_manager.get_entities_by_type('bullet')
 
     def compile_network_attrs(self):
         self.network_attrs.rect = self.rect
@@ -22,7 +23,9 @@ class ServerWall(ServerEntity):
     def check_collsion_with_bullets(self):
         for bullet_id, bullet in self.bullets.items():
             if self.rect.colliderect(bullet.rect):
-                print("bullet collided with the wall")
+                self.global_vars.sock.queue_packet(
+                    RemoveEntityPacket('bullet', bullet_id))
+                entity_manager.add_entity_to_removed_entities(bullet_id)
 
     def update(self):
         self.check_collsion_with_bullets()
@@ -38,4 +41,4 @@ class ClientWall(ClientEntity):
     def update(self, screen: pygame.Surface):
         screen.blit(self.img, self.attrs.rect)
 
-add_entity_type('wall', (ServerWall, ClientWall))
+entity_manager.add_entity_type('wall', (ServerWall, ClientWall))

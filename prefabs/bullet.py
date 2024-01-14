@@ -36,4 +36,4 @@ class ClientBullet(ClientEntity):
     def update(self, screen: Surface):
         screen.blit(self.img, self.attrs.rect)
 
-add_entity_type('bullet', (ServerBullet, ClientBullet))
+entity_manager.add_entity_type('bullet', (ServerBullet, ClientBullet))

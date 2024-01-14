@@ -29,7 +29,7 @@ class Game:
         if packet_type == EntityUpdatePacket:
             # add entity if doesn't exist on client side
             if packet.entity_id not in self.entities:
-                self.entities[packet.entity_id] = create_client_entity(
+                self.entities[packet.entity_id] = entity_manager.create_client_entity(
                     packet.entity_type,
                     packet.entity_id,
                     packet.entity_attrs)
@@ -41,7 +41,7 @@ class Game:
             del self.entities[packet.entity_id]
 
     def run(self):
-        self.sock.connect_to_server('localhost', 9999)
+        self.sock.connect_to_server('192.168.1.39', 9999)
         self.sock.send_packet('CONNECT')
         
         while self.running:
@@ -65,8 +65,6 @@ class Game:
                         ShootBulletPacket(pygame.Vector2(pygame.mouse.get_pos())))
                 elif event.type == pygame.VIDEORESIZE:
                     pass
-            
-            #self.background.update(self.screen)
 
             for _, entity in self.entities.items():
                 entity.update(self.screen)
